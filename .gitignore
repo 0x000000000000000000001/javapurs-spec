@@ -11,3 +11,6 @@ tags
 .spago
 .spec-results
 .vscode/
+java_output/
+classes/
+.spago/
