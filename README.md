@@ -2,8 +2,8 @@
 
 ## JVM tests
 
-`./bin/test` delegates to the [common runner](../javapurs/docs/testing.md#port-particulier) as `spec`, but currently exits **1** with an unsupported-completion diagnostic: `Test.Main` uses `launchAff_`, spec-node CLI/process exit and integration subprocesses without a joined completion action.
-`./bin/test --help` is read-only. Even with `--clean`, this unsupported protocol is rejected before build/workspace creation; the checkout and its outputs are preserved. See the [protocol inventory](../javapurs/docs/port-launchers.md).
+`./bin/test` delegates to the [common runner](../javapurs/docs/testing.md#port-particulier) as `spec`. The JVM wrapper executes the pure Spec suite: **62 tests pass**, three upstream pending examples are allowed, and the common failure probes run. The integration tests that spawn `npx`/`spec-node` are **not** part of this JVM validation because `node-child-process` has no Java port.
+`./bin/test --help` is read-only and `--clean` rebuilds the backend first. See the [protocol inventory](../javapurs/docs/port-launchers.md) and [M30](../javapurs/docs/testing.md#validation-m30).
 
 [![Build Status](https://github.com/purescript-spec/purescript-spec/workflows/CI/badge.svg?branch=master)](https://github.com/purescript-spec/purescript-spec/actions?query=workflow%3ACI+branch%3Amaster)
 

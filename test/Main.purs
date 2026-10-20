@@ -14,11 +14,21 @@ import Test.Spec.AssertionSpec (assertionSpec)
 import Test.Spec.HoistSpec (hoistSpecSpec)
 import Test.Spec.HookSpec (hookSpec)
 import Test.Spec.ParallelSpec (parallelSpec)
+import Test.Spec (Spec)
 import Test.Spec.Reporter (specReporter)
 import Test.Spec.Reporter.TeamCitySpec (teamcitySpec)
 import Test.Spec.Runner.Node (runSpecAndExitProcess')
 import Test.Spec.Runner.Node.Config as Config
 import Test.Spec.RunnerSpec (runnerSpec)
+
+pureSpec ∷ Spec Unit
+pureSpec = do
+  runnerSpec
+  assertionSpec
+  hookSpec
+  hoistSpecSpec
+  parallelSpec
+  teamcitySpec
 
 main :: Effect Unit
 main = launchAff_ do
@@ -33,15 +43,7 @@ main = launchAff_ do
       , parseCLIOptions: false
       }
       [specReporter] $
-      pureSpecs *> integration
-  where
-    pureSpecs = do
-      runnerSpec
-      assertionSpec
-      hookSpec
-      hoistSpecSpec
-      parallelSpec
-      teamcitySpec
+      pureSpec *> integration
 
 type Config = Config.TestRunConfig' (debug :: Boolean, accept :: Boolean)
 
