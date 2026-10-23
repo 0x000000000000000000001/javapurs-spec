@@ -40,7 +40,7 @@ import Pipes (yield, (>->))
 import Pipes.Core (Producer, Pipe, (//>))
 import Pipes.Core (runEffect, runEffectRec) as P
 import Prim.TypeError (class Warn, Text)
-import Test.Spec (Item(..), Spec, SpecT, SpecTree, Tree(..), collect)
+import Test.Spec (Item(..), Spec, SpecT, Tree(..), collect)
 import Test.Spec.Config (Config, TreeFilter(..), defaultConfig)
 import Test.Spec.Console as Console
 import Test.Spec.Result (Result(..))
@@ -50,7 +50,7 @@ import Test.Spec.Speed (speedOf)
 import Test.Spec.Style (styled)
 import Test.Spec.Style as Style
 import Test.Spec.Summary (successful)
-import Test.Spec.Tree (Path, annotatedWithPaths, countTests, isAllParallelizable)
+import Test.Spec.Tree (annotatedWithPaths, countTests, isAllParallelizable)
 
 foreign import exit :: Int -> Effect Unit
 
@@ -69,8 +69,6 @@ timeout
 timeout time t = do
   sequential (parallel (try (makeTimeout time)) <|> parallel (try t))
     >>= either throwError pure
-
-type TestWithPath r = {test :: SpecTree Aff Unit, path :: Path | r}
 
 -- Run the given spec as `Producer` in the underlying `Aff` monad.
 -- This producer has two responsibilities:

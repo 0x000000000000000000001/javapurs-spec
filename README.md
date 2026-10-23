@@ -1,8 +1,12 @@
 # PureScript Spec
 
+Java port of the PureScript `spec` package. See the
+[port maintenance guide](../javapurs/docs/port-maintenance.md)
+for source layout, local dependency selection and JVM validation.
+
 ## JVM tests
 
-`./bin/test` delegates to the [common runner](../javapurs/docs/testing.md#port-particulier) as `spec`. The JVM wrapper executes the pure Spec suite: **62 tests pass**, three upstream pending examples are allowed, and the common failure probes run. The integration tests that spawn `npx`/`spec-node` are **not** part of this JVM validation because `node-child-process` has no Java port.
+`./bin/test` delegates to the [common runner](../javapurs/docs/testing.md#port-particulier) as `spec`. The JVM wrapper executes the pure Spec suite and the eight integration cases: **70 checks pass**, three upstream pending examples are allowed, and the common failure probes run. The integration harness uses the local `spago` (no `npm install`) through `node-child-process`; subprocesses are bounded and their output is checked against the upstream golden files.
 `./bin/test --help` is read-only and `--clean` rebuilds the backend first. See the [protocol inventory](../javapurs/docs/port-launchers.md) and [M30](../javapurs/docs/testing.md#validation-m30).
 
 [![Build Status](https://github.com/purescript-spec/purescript-spec/workflows/CI/badge.svg?branch=master)](https://github.com/purescript-spec/purescript-spec/actions?query=workflow%3ACI+branch%3Amaster)

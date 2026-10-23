@@ -144,3 +144,5 @@ workspace:
       path: "../javapurs-variant"
     yoga-json:
       path: "../javapurs-yoga-json"
+    node-child-process:
+      path: "../javapurs-node-child-process"

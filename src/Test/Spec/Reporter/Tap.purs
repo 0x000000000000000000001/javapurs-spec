@@ -17,8 +17,6 @@ import Test.Spec.Runner.Event as Event
 import Test.Spec.Summary (Summary(..))
 import Test.Spec.Summary as Summary
 
-type TapReporterState = Int
-
 tapReporter :: Reporter
 tapReporter = defaultReporter 1 case _ of
   Event.Start nTests ->

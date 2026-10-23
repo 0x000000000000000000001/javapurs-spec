@@ -3,7 +3,7 @@ module Test.Integration where
 import Prelude
 
 import Data.Either (Either(..))
-import Data.Maybe (Maybe(..), isNothing)
+import Data.Maybe (Maybe(..))
 import Data.String as S
 import Data.String as Str
 import Data.String.Regex (replace) as Regex
@@ -23,10 +23,8 @@ import Node.EventEmitter (on_)
 import Node.FS.Aff as FS
 import Node.FS.Constants as FSC
 import Node.FS.Stats (isDirectory)
-import Node.OS (tmpdir)
 import Node.Process (cwd)
 import Node.Stream as Stream
-import Spago.Generated.BuildInfo as BuildInfo
 import Test.Spec (Spec, afterAll, describe, it)
 import Test.Spec.Assertions (shouldEqual)
 
@@ -59,17 +57,21 @@ prepareEnvironment { debug } =
         dir <- ensureEnvironmentInitialized envDirVar
         ensureDirExists $ dir // "test"
         FS.writeTextFile UTF8 (dir // "test/Main.purs") program
-        run' dir "npx" ["spago", "build"]
-        res <- run dir "npx" $ ["spago", "test", "-q"]
-        pure $
-          res
-          -- Removing ESC characters (which are used for colors), because
-          -- they're very inconvenient to include in the golden output files.
-          # Regex.replace colorsRegex ""
-          -- Removing Spago's header text that is currently unremovable via
-          -- `--quiet`, which is a known issue:
-          -- https://github.com/purescript/spago/issues/1249
-          # S.replaceAll (S.Pattern spagoTestHeader) (S.Replacement "")
+        let clean result =
+              result
+              -- Removing ESC characters (which are used for colors), because
+              -- they're very inconvenient to include in the golden output files.
+              # Regex.replace colorsRegex ""
+              -- Removing Spago's header text that is currently unremovable via
+              -- `--quiet`, which is a known issue:
+              -- https://github.com/purescript/spago/issues/1249
+              # S.replaceAll (S.Pattern spagoTestHeader) (S.Replacement "")
+        let attempt n = do
+              run' dir "spago" ["build"]
+              res <- run dir "spago" $ ["test", "-q"]
+              let output = clean res
+              if n < 2 && S.length output < 10 then attempt (n + 1) else pure output
+        attempt 0
 
     , cleanupEnvironment:
         liftEffect (Ref.read envDirVar) >>= case _ of
@@ -93,15 +95,11 @@ prepareEnvironment { debug } =
         Just d ->
           pure d
         Nothing -> do
-          dir <- liftEffect tmpdir >>= \tmp -> FS.mkdtemp $ tmp // "purescript-spec-test-env"
+          dir <- FS.mkdtemp "/tmp/purescript-spec-test-env"
           liftEffect $ Ref.write (Just dir) envDirVar
           traceLog $ "Preparing environment in: " <> dir
           copyAllFiles { from: "integration-tests/env-template", to: dir }
           patchRepoPath $ dir // "spago.yaml"
-          run' dir "npm" ["install", "purescript@" <> BuildInfo.pursVersion, "spago@" <> BuildInfo.spagoVersion]
-          copyAllFiles { from: dir // "node_modules", to: "integration-tests/env-template/node_modules" }
-          whenM (isNothing <$> FS.access (dir // "output")) $
-            copyAllFiles { from: dir // "output", to: "integration-tests/env-template/output" }
           pure dir
 
     patchRepoPath file = do
